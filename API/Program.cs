@@ -18,6 +18,7 @@ builder.WebHost.ConfigureKestrel(options =>
         options.ServerCertificate = new X509Certificate2("httpcert.pfx", "MyPassword");
     });
 });
+builder.Services.AddCors();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -31,14 +32,14 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-
-}
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors(x => x
+    .AllowAnyHeader().AllowAnyMethod()
+    .WithOrigins("http://localhost:3000", "https://localhost:3000"));
 
 app.MapControllers();
 
