@@ -1,4 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
+using Application.Cities.Queries;
+using Application.Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -19,7 +21,9 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 builder.Services.AddCors();
-
+builder.Services.AddMediatR(x =>
+    x.RegisterServicesFromAssemblyContaining<GetCityList.Handler>());
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 // Add services to the container.
 builder.Services.AddControllers();
 
