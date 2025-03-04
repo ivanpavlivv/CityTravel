@@ -27,6 +27,7 @@ namespace Application.Cities.Commands
                     ?? throw new Exception("Details does not exist");
 
                 mapper.Map(request.DetailsDto, cityDetails);
+                cityDetails.UpdateDate = DateTime.Now;
 
                 await context.SaveChangesAsync(cancellationToken);
             }

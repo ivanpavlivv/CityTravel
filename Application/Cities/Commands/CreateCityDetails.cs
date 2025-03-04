@@ -31,7 +31,9 @@ namespace Application.Cities.Commands
                 }
 
                 var details = mapper.Map<CityDetails>(request.DetailsDto);
-
+                details.CreateDate = DateTime.Now;
+                details.UpdateDate = DateTime.Now;
+                
                 city.Details = details;
 
                 await context.CitiesDetails.AddAsync(details, cancellationToken);

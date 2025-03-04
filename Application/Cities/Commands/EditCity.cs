@@ -25,6 +25,7 @@ namespace Application.Cities.Commands
                     ?? throw new Exception("City does not exist");
 
                 mapper.Map(request.CityDto, city);
+                city.UpdateDate = DateTime.Now;
                 
                 await context.SaveChangesAsync(cancellationToken);
             }

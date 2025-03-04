@@ -21,14 +21,16 @@ namespace Application.Cities.Commands
         {
             public async Task<string> Handle(Command request, CancellationToken cancellationToken)
             {
-
                 var city = mapper.Map<City>(request.CityDto);
+
+                city.CreateDate = DateTime.Now;
+                city.UpdateDate = DateTime.Now;
 
                 context.Cities.Add(city);
 
                 await context.SaveChangesAsync(cancellationToken);
 
-                return request.CityDto.Name;
+                return city.Id;
             }
         }
     }

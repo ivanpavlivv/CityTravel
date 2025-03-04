@@ -11,8 +11,8 @@ namespace Application.Cities.DTOs
         public double TaxiCost { get; set; }
         public double ApartmentCost { get; set; }
         public double RentCost { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime UpdateDate { get; set; }
+        // public DateTime CreateDate { get; set; }
+        // public DateTime UpdateDate { get; set; }
         public string CityId { get; set; } = string.Empty;
     }
 }
