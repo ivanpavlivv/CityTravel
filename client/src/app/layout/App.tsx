@@ -5,8 +5,10 @@ import { Outlet } from "react-router";
 function App() {
   return (
     <Box sx={{ bgcolor: "#eeeeee", minHeight: "100vh" }}>
-      <CssBaseline />
+    <CssBaseline />
       <NavBar />
+      <Box minHeight="60px">
+      </Box>
       <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Outlet />
       </Container>

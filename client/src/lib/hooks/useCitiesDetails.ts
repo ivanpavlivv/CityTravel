@@ -26,8 +26,20 @@ export const useCitiesDetails = (id?: string) => {
     },
   });
 
+  const deleteCityDetails = useMutation({
+    mutationFn: async () => {
+      await agent.delete(`/cities/details/${id}`);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["citiesDetails"],
+      });
+    },
+  });
+
   return {
     createCityDetails,
     updateCityDetails,
+    deleteCityDetails,
   };
 };

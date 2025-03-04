@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useCities } from "../../../lib/hooks/useCities";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useCitiesDetails } from "../../../lib/hooks/useCitiesDetails";
@@ -127,7 +127,7 @@ export default function CityForm() {
         )}
 
         <Box display="flex" justifyContent="end" gap={3}>
-          <Button color="inherit">Cancel</Button>
+          <Button component={Link} to={`/cities`} color="inherit">Cancel</Button>
           <Button
             type="submit"
             color="success"

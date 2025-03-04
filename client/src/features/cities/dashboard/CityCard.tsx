@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Link } from "react-router";
+import { formatDistance } from "date-fns";
 
 type Props = {
   city: City;
@@ -18,12 +19,18 @@ export default function CityCard({ city }: Props) {
   return (
     <Card>
       <CardContent>
-        <Box key={city.id} display="flex" gap={1}>
-          <LocationCity fontSize="small" />
-          <Typography>{city.name}</Typography>
+        <Box key={city.id} display="flex" gap={1} mb={2}>
+          <LocationCity fontSize="large" />
+          <Typography fontWeight="bold" variant="h4">
+            {city.name}
+          </Typography>
         </Box>
         <Typography>{city.description}</Typography>
-        <Typography>{city.createDate}</Typography>
+        <Typography>
+          {formatDistance(city.createDate, new Date(), {
+            addSuffix: true,
+          })}
+        </Typography>
       </CardContent>
       <CardActions>
         <Chip label={city.latitude} variant="outlined" />
