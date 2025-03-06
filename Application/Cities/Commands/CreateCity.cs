@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Cities.DTOs;
+using Application.Core;
 using AutoMapper;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -12,14 +14,14 @@ namespace Application.Cities.Commands
 {
     public class CreateCity
     {
-        public class Command : IRequest<string>
+        public class Command : IRequest<Result<string>>
         {
             public required CreateCityDto CityDto { get; set; }
         }
 
-        public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, string>
+        public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<string>>
         {
-            public async Task<string> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var city = mapper.Map<City>(request.CityDto);
 
@@ -28,9 +30,11 @@ namespace Application.Cities.Commands
 
                 context.Cities.Add(city);
 
-                await context.SaveChangesAsync(cancellationToken);
+                var result = await context.SaveChangesAsync(cancellationToken) > 0;
 
-                return city.Id;
+                if (!result) return Result<string>.Failure("Failed to create city", 400);
+
+                return Result<string>.Success(city.Id);
             }
         }
     }

@@ -1,6 +1,9 @@
 using System.Security.Cryptography.X509Certificates;
+using API.Middleware;
 using Application.Cities.Queries;
+using Application.Cities.Validators;
 using Application.Core;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -20,11 +23,17 @@ builder.WebHost.ConfigureKestrel(options =>
         options.ServerCertificate = new X509Certificate2("httpcert.pfx", "MyPassword");
     });
 });
+// Add services to the container.
 builder.Services.AddCors();
 builder.Services.AddMediatR(x =>
-    x.RegisterServicesFromAssemblyContaining<GetCityList.Handler>());
+{
+    x.RegisterServicesFromAssemblyContaining<GetCityList.Handler>();
+    x.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+});
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-// Add services to the container.
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCityValidator>();
+builder.Services.AddTransient<ExceptionMiddleware>();
+
 builder.Services.AddControllers();
 
 // Connection to the MSSQL Database Reactivities
@@ -36,6 +45,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 

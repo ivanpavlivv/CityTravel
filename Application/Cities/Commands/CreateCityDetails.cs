@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Cities.DTOs;
+using Application.Core;
 using AutoMapper;
 using Domain;
 using MediatR;
@@ -13,22 +14,20 @@ namespace Application.Cities.Commands
 {
     public class CreateCityDetails
     {
-        public class Command : IRequest<string>
+        public class Command : IRequest<Result<string>>
         {
             public required CreateCityDetailsDto DetailsDto { get; set; }
         }
 
-        public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, string>
+        public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<string>>
         {
-            public async Task<string> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var city = context.Cities.Include(x => x.Details).First(x => x.Id == request.DetailsDto.CityId)
-                    ?? throw new Exception("City details provided with nonexistent city");
+                var city = context.Cities.Include(x => x.Details).First(x => x.Id == request.DetailsDto.CityId);
 
-                if (city.Details != null)
-                {
-                    throw new Exception("Details for this city already exist");
-                }
+                if(city == null) return Result<string>.Failure("Details provided with nonexistent city", 404);
+
+                if (city.Details != null) return Result<string>.Failure("Details for provided city already exist", 400);
 
                 var details = mapper.Map<CityDetails>(request.DetailsDto);
                 details.CreateDate = DateTime.Now;
@@ -38,9 +37,11 @@ namespace Application.Cities.Commands
 
                 await context.CitiesDetails.AddAsync(details, cancellationToken);
 
-                await context.SaveChangesAsync(cancellationToken);
+                var result = await context.SaveChangesAsync(cancellationToken) > 0;
 
-                return details.Id;
+                if (!result) return Result<string>.Failure("Failed to create details", 400);
+
+                return Result<string>.Success(details.Id);
             }
         }
     }
