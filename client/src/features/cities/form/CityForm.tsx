@@ -4,60 +4,71 @@ import {
   FormControlLabel,
   Paper,
   Switch,
-  TextField,
   Typography,
 } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router";
 import { useCities } from "../../../lib/hooks/useCities";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useCitiesDetails } from "../../../lib/hooks/useCitiesDetails";
+import { useForm } from "react-hook-form";
+import { citySchema, CitySchema } from "../../../lib/schemas/citySchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import TextInput from "../../../app/shared/components/TextInput";
+import LocationMap from "../../../app/shared/components/LocationMap";
+import { City, Details, LocationIQSuggestion } from "../../../lib/types";
 
 export default function CityForm() {
+  const { reset, control, handleSubmit, resetField } = useForm<CitySchema>({
+    mode: "onTouched",
+    resolver: zodResolver(citySchema),
+  });
   const [checked, setChecked] = useState(false);
   const { id } = useParams();
   const { updateCity, createCity, city, isLoadingCity } = useCities(id);
   const { createCityDetails, updateCityDetails } = useCitiesDetails(
     city?.details?.id
   );
+  const [suggestion, setSuggestion] = useState<LocationIQSuggestion | null>();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (city) reset(city);
+  }, [city, reset]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked);
+    if (checked) {
+      resetField("details");
+    }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-
-    const data: { [key: string]: FormDataEntryValue } = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
-
-    if (city) {
-      await updateCity.mutateAsync(data as unknown as City);
-
-      if (checked) {
-        data.cityId = city.id;
-        if (city.details) {
-          await updateCityDetails.mutateAsync(data as unknown as Details);
-        } else {
-          await createCityDetails.mutateAsync(data as unknown as Details);
-        }
-      }
-
-      navigate(`/cities/${city.id}`);
-    } else {
-      createCity.mutate(data as unknown as City, {
-        onSuccess: (id) => {
-          if (checked) {
-            data.cityId = id;
-            createCityDetails.mutate(data as unknown as Details);
+  const onSubmit = async (data: CitySchema) => {
+    const flattenedDetails = data.details as Details;
+    try {
+      if (city) {
+        updateCity.mutate(data as City);
+        flattenedDetails.cityId = city.id;
+        if (checked) {
+          if (city.details) {
+            await updateCityDetails.mutateAsync(flattenedDetails);
+          } else {
+            await createCityDetails.mutateAsync(flattenedDetails);
           }
-          navigate(`/cities/${id}`);
-        },
-      });
+        }
+        navigate(`/cities/${city.id}`);
+      } else {
+        createCity.mutate(data as City, {
+          onSuccess: (id) => {
+            if (checked) {
+              flattenedDetails.cityId = id;
+              createCityDetails.mutate(flattenedDetails);
+            }
+            navigate(`/cities/${id}`);
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -70,28 +81,35 @@ export default function CityForm() {
       </Typography>
       <Box
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         display="flex"
         flexDirection="column"
         gap={3}
       >
-        <TextField name="name" label="Name" defaultValue={city?.name} />
-        <TextField
-          name="description"
+        <TextInput
+          label="Name"
+          control={control}
+          name="name"
+          locationValue={suggestion?.address.city}
+        />
+        <TextInput
           label="Description"
-          defaultValue={city?.description}
+          control={control}
+          name="description"
           multiline
           rows={3}
         />
-        <TextField
-          name="latitude"
+        <TextInput
           label="Latitude"
-          defaultValue={city?.latitude}
+          control={control}
+          name="latitude"
+          locationValue={suggestion?.lat ? +suggestion.lat : undefined}
         />
-        <TextField
-          name="longitude"
+        <TextInput
           label="Longitude"
-          defaultValue={city?.longitude}
+          control={control}
+          name="longitude"
+          locationValue={suggestion?.lon ? +suggestion.lon : undefined}
         />
         <Box bgcolor={"#e8f5e9"} borderRadius={2}>
           <FormControlLabel
@@ -101,33 +119,36 @@ export default function CityForm() {
         </Box>
         {checked && (
           <>
-            <TextField
-              name="costOfFood"
+            <TextInput
               label="Cost of Food"
-              defaultValue={city?.details?.costOfFood}
+              control={control}
+              name="details.costOfFood"
             />
-            <TextField
-              name="taxiCost"
+            <TextInput
               label="Taxi Cost"
-              defaultValue={city?.details?.taxiCost}
-              multiline
-              rows={3}
+              control={control}
+              name="details.taxiCost"
             />
-            <TextField
-              name="apartmentCost"
+            <TextInput
               label="Apartment Cost"
-              defaultValue={city?.details?.apartmentCost}
+              control={control}
+              name="details.apartmentCost"
             />
-            <TextField
-              name="rentCost"
+            <TextInput
               label="Rent Cost"
-              defaultValue={city?.details?.rentCost}
+              control={control}
+              name="details.rentCost"
             />
           </>
         )}
+        <Box bgcolor={"#e8f5e9"} borderRadius={2}>
+          <LocationMap setSuggestion={setSuggestion}></LocationMap>
+        </Box>
 
         <Box display="flex" justifyContent="end" gap={3}>
-          <Button component={Link} to={`/cities`} color="inherit">Cancel</Button>
+          <Button component={Link} to={`/cities`} color="inherit">
+            Cancel
+          </Button>
           <Button
             type="submit"
             color="success"

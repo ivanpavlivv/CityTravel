@@ -12,12 +12,15 @@ import { useCities } from "../../../lib/hooks/useCities";
 import DialogButton from "../../../app/shared/components/DialogButton";
 import { useCitiesDetails } from "../../../lib/hooks/useCitiesDetails";
 import { formatDate } from "../../../lib/util/util";
+import { useState } from "react";
+import MapComponent from "../../../app/shared/components/MapComponent";
 
 export default function CityDetails() {
   const { id } = useParams();
   const { city, deleteCity, isLoadingCity } = useCities(id);
   const { deleteCityDetails } = useCitiesDetails(city?.details?.id);
   const navigate = useNavigate();
+  const [mapOpen, setMapOpen] = useState(false);
 
   if (!city || isLoadingCity) return <Typography>Loading...</Typography>;
 
@@ -63,12 +66,10 @@ export default function CityDetails() {
                   </Typography>
                   <Typography>Rent cost: {city.details.rentCost}</Typography>
                   <Typography>
-                    Create Date:{" "}
-                    {formatDate(city.details.createDate)}
+                    Create Date: {formatDate(city.details.createDate)}
                   </Typography>
                   <Typography>
-                    Update Date:{" "}
-                    {formatDate(city.details.updateDate)}
+                    Update Date: {formatDate(city.details.updateDate)}
                   </Typography>
                   <DialogButton
                     title={`Remove details for city ${city.name}`}
@@ -76,6 +77,7 @@ export default function CityDetails() {
                     handleProceed={handleDeleteCityDetails}
                     color="error"
                     variant="contained"
+                    sx={{mt: 1, mb: 1}}
                   >
                     Delete Details
                   </DialogButton>
@@ -86,9 +88,17 @@ export default function CityDetails() {
             )}
           </Grid2>
         </Grid2>
+        {mapOpen && (
+          <Box sx={{ height: 400, zIndex: 1000, display: "block", mt: 3}}>
+            <MapComponent position={[city.latitude, city.longitude]} markerName={city.name} />
+          </Box>
+        )}
       </CardContent>
       <CardActions sx={{ justifyContent: "space-between" }}>
         <Box>
+          <Button onClick={() => setMapOpen(!mapOpen)}>
+            {mapOpen ? "Hide map" : "Show map"}
+          </Button>
           <Button component={Link} to={`/manage/${city.id}`} color="primary">
             Edit
           </Button>
