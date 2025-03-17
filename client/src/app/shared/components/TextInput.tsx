@@ -7,28 +7,28 @@ import {
 } from "react-hook-form";
 
 type Props<T extends FieldValues> = {
-  locationValue?: string | number;
+  autoValue?: string | number;
 } & UseControllerProps<T> &
   TextFieldProps;
 
 export default function TextInput<T extends FieldValues>({
-  locationValue,
+  autoValue,
   ...props
 }: Props<T>) {
   const { field, fieldState } = useController({ ...props });
   
   // Update field value when locationValue changes
   useEffect(() => {
-    if (locationValue !== undefined && locationValue !== null) {
-      field.onChange(locationValue);
+    if (autoValue !== undefined && autoValue !== null) {
+      field.onChange(autoValue);
     }
-  }, [locationValue, field]);
+  }, [autoValue, field]);
 
   return (
     <TextField
       {...props}
       {...field}
-      value={locationValue || field.value || ""}
+      value={autoValue || field.value || ""}
       fullWidth
       variant="outlined"
       error={!!fieldState.error}

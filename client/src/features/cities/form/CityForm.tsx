@@ -16,12 +16,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import TextInput from "../../../app/shared/components/TextInput";
 import LocationMap from "../../../app/shared/components/LocationMap";
 import { City, Details, LocationIQSuggestion } from "../../../lib/types";
+import CityDetailsInputs from "./CityDetailsInputs";
 
 export default function CityForm() {
-  const { reset, control, handleSubmit, resetField } = useForm<CitySchema>({
-    mode: "onTouched",
-    resolver: zodResolver(citySchema),
-  });
+  const { reset, control, handleSubmit, resetField, getValues } =
+    useForm<CitySchema>({
+      mode: "onTouched",
+      resolver: zodResolver(citySchema),
+    });
   const [checked, setChecked] = useState(false);
   const { id } = useParams();
   const { updateCity, createCity, city, isLoadingCity } = useCities(id);
@@ -77,7 +79,7 @@ export default function CityForm() {
   return (
     <Paper sx={{ borderRadius: 3, padding: 3 }}>
       <Typography variant="h5" gutterBottom color="primary">
-        {city ? "Edit city" : "Create city"}
+        {city ? "Edit City" : "Create City"}
       </Typography>
       <Box
         component="form"
@@ -87,10 +89,10 @@ export default function CityForm() {
         gap={3}
       >
         <TextInput
-          label="Name"
+          label="City Name"
           control={control}
           name="name"
-          locationValue={suggestion?.address.city}
+          autoValue={suggestion?.address.city}
         />
         <TextInput
           label="Description"
@@ -99,51 +101,35 @@ export default function CityForm() {
           multiline
           rows={3}
         />
-        <TextInput
-          label="Latitude"
-          control={control}
-          name="latitude"
-          locationValue={suggestion?.lat ? +suggestion.lat : undefined}
-        />
-        <TextInput
-          label="Longitude"
-          control={control}
-          name="longitude"
-          locationValue={suggestion?.lon ? +suggestion.lon : undefined}
-        />
         <Box bgcolor={"#e8f5e9"} borderRadius={2}>
           <FormControlLabel
             control={<Switch checked={checked} onChange={handleChange} />}
             label="Details"
           />
         </Box>
+
         {checked && (
-          <>
-            <TextInput
-              label="Cost of Food"
-              control={control}
-              name="details.costOfFood"
-            />
-            <TextInput
-              label="Taxi Cost"
-              control={control}
-              name="details.taxiCost"
-            />
-            <TextInput
-              label="Apartment Cost"
-              control={control}
-              name="details.apartmentCost"
-            />
-            <TextInput
-              label="Rent Cost"
-              control={control}
-              name="details.rentCost"
-            />
-          </>
+          <CityDetailsInputs
+            control={control}
+            cityName={getValues("name")}
+          ></CityDetailsInputs>
         )}
         <Box bgcolor={"#e8f5e9"} borderRadius={2}>
           <LocationMap setSuggestion={setSuggestion}></LocationMap>
         </Box>
+
+        <TextInput
+          label="Latitude"
+          control={control}
+          name="latitude"
+          autoValue={suggestion?.lat ? +suggestion.lat : undefined}
+        />
+        <TextInput
+          label="Longitude"
+          control={control}
+          name="longitude"
+          autoValue={suggestion?.lon ? +suggestion.lon : undefined}
+        />
 
         <Box display="flex" justifyContent="end" gap={3}>
           <Button component={Link} to={`/cities`} color="inherit">

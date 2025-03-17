@@ -10,7 +10,7 @@ export default function MapComponent({position, markerName}: Props) {
   return (
     <MapContainer
       center={position}
-      zoom={13}
+      zoom={10}
       scrollWheelZoom={false}
       style={{ height: "100%", borderRadius: 2}}
     >

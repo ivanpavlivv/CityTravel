@@ -56,15 +56,22 @@ export default function CityDetails() {
             {city.details ? (
               <Box bgcolor={"#e8f5e9"} borderRadius={2}>
                 <Box mx={2}>
-                  <Typography variant="h5">Cost of living</Typography>
-                  <Typography>
-                    Cost of Food: {city.details.costOfFood}
+                  <Typography variant="h5">
+                    Average cost of living in {city.name}
                   </Typography>
-                  <Typography>Taxi cost: {city.details.taxiCost}</Typography>
                   <Typography>
-                    Apartment cost: {city.details.apartmentCost}
+                    Meal, inexpensive restaurant: {city.details.costOfFood}$
                   </Typography>
-                  <Typography>Rent cost: {city.details.rentCost}</Typography>
+                  <Typography>
+                    Taxi cost (1 km): {city.details.taxiCost}$
+                  </Typography>
+                  <Typography>
+                    Apartment cost in city center (1 square meter):{" "}
+                    {city.details.apartmentCost}$
+                  </Typography>
+                  <Typography>
+                    Rent cost in city center (1 month): {city.details.rentCost}$
+                  </Typography>
                   <Typography>
                     Create Date: {formatDate(city.details.createDate)}
                   </Typography>
@@ -77,7 +84,7 @@ export default function CityDetails() {
                     handleProceed={handleDeleteCityDetails}
                     color="error"
                     variant="contained"
-                    sx={{mt: 1, mb: 1}}
+                    sx={{ mt: 1, mb: 1 }}
                   >
                     Delete Details
                   </DialogButton>
@@ -89,8 +96,11 @@ export default function CityDetails() {
           </Grid2>
         </Grid2>
         {mapOpen && (
-          <Box sx={{ height: 400, zIndex: 1000, display: "block", mt: 3}}>
-            <MapComponent position={[city.latitude, city.longitude]} markerName={city.name} />
+          <Box sx={{ height: 400, zIndex: 1000, display: "block", mt: 3 }}>
+            <MapComponent
+              position={[city.latitude, city.longitude]}
+              markerName={city.name}
+            />
           </Box>
         )}
       </CardContent>
